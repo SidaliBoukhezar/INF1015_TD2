@@ -1,0 +1,3 @@
+C:/Users/Sidali/Documents/INF1015/TD2-A22-Fichiers/out/build/x64-Debug/CMakeFiles/ProjetTD2.dir
+C:/Users/Sidali/Documents/INF1015/TD2-A22-Fichiers/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Sidali/Documents/INF1015/TD2-A22-Fichiers/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
