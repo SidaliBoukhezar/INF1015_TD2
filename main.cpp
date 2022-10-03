@@ -5,6 +5,7 @@
 #include "cppitertools/range.hpp"
 #include "gsl/span"
 #include "bibliotheque_cours.hpp"
+#include "Developpeur.hpp"
 #include "verification_allocation.hpp"
 #include "debogage_memoire.hpp"  //NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
 
@@ -55,7 +56,7 @@ gsl::span<Concepteur*> spanListeConcepteurs(const ListeConcepteurs& liste)
 // Cette fonction renvoie le pointeur vers le concepteur si elle le trouve dans
 // un des jeux de la ListeJeux. En cas contraire, elle renvoie un pointeur nul.
 
-Concepteur* chercherConcepteurs(ListeJeux listeJeux, string nom_concepteur) {
+Concepteur* chercherConcepteurs(ListeJeux &listeJeux, string nom_concepteur) {
 	for (int i = 0; i < listeJeux.nElements; i++) {
 		for (int j = 0; j < listeJeux.elements[i]->concepteurs.nElements; j++) {
 			if ( listeJeux.elements[i]->concepteurs.elements[j]->nom == nom_concepteur) 
@@ -66,7 +67,7 @@ Concepteur* chercherConcepteurs(ListeJeux listeJeux, string nom_concepteur) {
 }
 
 
-Concepteur* lireConcepteur(ListeJeux listeJeux, istream& fichier)
+Concepteur* lireConcepteur(ListeJeux listeJeux, istream& fichier, Jeu* pJeu)
 {
 	Concepteur concepteur = {}; // On initialise une structure vide de type Concepteur.
 	concepteur.nom = lireString(fichier);
@@ -77,11 +78,16 @@ Concepteur* lireConcepteur(ListeJeux listeJeux, istream& fichier)
 
 	//TODO: Ajouter en mémoire le concepteur lu. Il faut revoyer le pointeur créé.
 	
-	if (chercherConcepteurs(listeJeux, concepteur.nom) == nullptr){
+	Concepteur* pConcepteur = chercherConcepteurs(listeJeux, concepteur.nom);
+
+	if (pConcepteur == nullptr){
 		Concepteur* ajoutConcepteur = new Concepteur(concepteur);
 		cout << "L'allocation du concepteur est réussite" << endl;
 		return ajoutConcepteur;
 	}
+	pConcepteur->jeuxConcus.elements[pConcepteur->jeuxConcus.nElements++];
+	pJeu->concepteurs.elements[pJeu->concepteurs.nElements] = pConcepteur;
+	pJeu->concepteurs.nElements++;
 	// Attention, valider si le concepteur existe déjà avant de le créer, sinon
 	// on va avoir des doublons car plusieurs jeux ont des concepteurs en commun
 	// dans le fichier binaire. Pour ce faire, cette fonction aura besoin de
@@ -175,19 +181,22 @@ Jeu* lireJeu(istream& fichier, ListeJeux& listeJeux)
 	// l'allocation du jeu est réussie.
 
 	Jeu * pJeu = new Jeu(jeu);
-	pJeu->concepteurs.elements = new Concepteur* [pJeu->concepteurs.capacite];
+	pJeu->concepteurs.elements = new Concepteur* [pJeu->concepteurs.nElements];
+	pJeu->concepteurs.nElements = 0;
 
-	cout << jeu.titre << endl;  //TODO: Enlever cet affichage temporaire servant à voir que le code fourni lit bien les jeux.
 	for ([[maybe_unused]] size_t i : iter::range(jeu.concepteurs.nElements)) {
-		Concepteur* pConcepteur = lireConcepteur(listeJeux, fichier);  //TODO: Mettre le concepteur dans la liste des concepteur du jeu.
-		pJeu->concepteurs.elements[pJeu->concepteurs.nElements] = pConcepteur;
+		Concepteur* pConcepteur = lireConcepteur(listeJeux, fichier, pJeu);  //TODO: Mettre le concepteur dans la liste des concepteur du jeu.
+
 		//TODO: Ajouter le jeu à la liste des jeux auquel a participé le concepteur.
-
-		
-		pConcepteur->jeuxConcus.elements = new Jeu * [20];
-
-		pConcepteur->jeuxConcus.elements[pConcepteur->jeuxConcus.nElements++] = pJeu;
+		if (pConcepteur == nullptr)
+		{
+			pConcepteur->jeuxConcus.elements = new Jeu * [20];
+			pConcepteur->jeuxConcus.elements[pConcepteur->jeuxConcus.nElements++] = pJeu;
+			pJeu->concepteurs.elements[i] = pConcepteur;
+			pJeu->concepteurs.nElements++;
+		}
 	}
+	pJeu->concepteurs.capacite = pJeu->concepteurs.nElements;
 	return pJeu; //TODO: Retourner le pointeur vers le nouveau jeu.
 }
 
@@ -197,12 +206,14 @@ ListeJeux creerListeJeux(const string& nomFichier)
 	fichier.exceptions(ios::failbit);
 	size_t nElements = lireUintTailleVariable(fichier);
 	ListeJeux listeJeux = {};
-
+	listeJeux.capacite = nElements;
+	listeJeux.nElements = 0;
 	listeJeux.elements = new Jeu * [nElements];
 	for([[maybe_unused]] size_t n : iter::range(nElements))
 	{
 		Jeu * pJeu = lireJeu(fichier, listeJeux); //TODO: Ajouter le jeu à la ListeJeux.
 		listeJeux.elements[n] = pJeu;
+		listeJeux.nElements++;
 	}
 
 	return listeJeux; //TODO: Renvoyer la ListeJeux.
@@ -324,7 +335,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	afficherTousJeux(&liste);
 	
 	//TODO: Faire les appels à toutes vos fonctions/méthodes pour voir qu'elles fonctionnent et avoir 0% de lignes non exécutées dans le programme (aucune ligne rouge dans la couverture de code; c'est normal que les lignes de "new" et "delete" soient jaunes).  Vous avez aussi le droit d'effacer les lignes du programmes qui ne sont pas exécutée, si finalement vous pensez qu'elle ne sont pas utiles.
-
+	Developpeur dev = Developpeur("Square");
+	dev.updateListeJeux(liste);
+	dev.afficherListeJeux(liste);
+	string nom = dev.getName();
 	//TODO: Détruire tout avant de terminer le programme.  Devrait afficher "Aucune fuite detectee." a la sortie du programme; il affichera "Fuite detectee:" avec la liste des blocs, s'il manque des delete.
 	detruireListeJeux(liste);
 	delete fuite;
