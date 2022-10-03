@@ -13,10 +13,15 @@ public:
 	~ListeDeveloppeurs();
 
 	void afficherDev();
-	void retirerDev();
+
+	void ajouterDev(Developpeur &dev);
+	void retirerDev(Developpeur &dev);
 
 
 private:
 	size_t nElements, capacite;
 	Developpeur** elements;
+	void doublerCapacite();
+	bool devExist(Developpeur& dev);
+
 };

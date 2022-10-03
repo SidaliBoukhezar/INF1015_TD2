@@ -39,11 +39,11 @@ void Developpeur::updateListeJeux(ListeJeux &listeJeux) {
 	}
 }
 
-void Developpeur::afficherListeJeux(ListeJeux listeJeux) {
-	for (int i = 0; i < listeJeux.nElements; i++) {
-		if (listeJeux.elements[i]->developpeur == paireNomJeux_.first) {
-			cout << listeJeux.elements[i]->titre + "\n";
-		}
+void Developpeur::afficherListeJeux() {
+
+	cout << "-------- List Jeux Dev ---------\n";
+	for (int i = 0; i < paireNomJeux_.second.nElements; i++) {
+			cout << paireNomJeux_.second.elements[i]->titre + "\n";
 	}
 }
 

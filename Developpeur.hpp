@@ -16,7 +16,7 @@ public:
 	string getName();
 	int compterNombreJeux(ListeJeux &listeJeux);
 	void updateListeJeux(ListeJeux &listeJeux);
-	void afficherListeJeux(ListeJeux listeJeux);
+	void afficherListeJeux();
 
 private:
 	pair<string, ListeJeux> paireNomJeux_;

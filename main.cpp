@@ -6,6 +6,7 @@
 #include "gsl/span"
 #include "bibliotheque_cours.hpp"
 #include "Developpeur.hpp"
+#include "ListeDeveloppeurs.hpp"
 #include "verification_allocation.hpp"
 #include "debogage_memoire.hpp"  //NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
 
@@ -337,8 +338,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	//TODO: Faire les appels à toutes vos fonctions/méthodes pour voir qu'elles fonctionnent et avoir 0% de lignes non exécutées dans le programme (aucune ligne rouge dans la couverture de code; c'est normal que les lignes de "new" et "delete" soient jaunes).  Vous avez aussi le droit d'effacer les lignes du programmes qui ne sont pas exécutée, si finalement vous pensez qu'elle ne sont pas utiles.
 	Developpeur dev = Developpeur("Square");
 	dev.updateListeJeux(liste);
-	dev.afficherListeJeux(liste);
-	string nom = dev.getName();
+	dev.afficherListeJeux();
+	cout << dev.getName();
+
+	ListeDeveloppeurs listDev = ListeDeveloppeurs();
+	listDev.ajouterDev(dev);
+	listDev.ajouterDev(dev);
+	listDev.afficherDev();
+	listDev.retirerDev(dev);
+	listDev.afficherDev();
+
 	//TODO: Détruire tout avant de terminer le programme.  Devrait afficher "Aucune fuite detectee." a la sortie du programme; il affichera "Fuite detectee:" avec la liste des blocs, s'il manque des delete.
 	detruireListeJeux(liste);
 	delete fuite;
